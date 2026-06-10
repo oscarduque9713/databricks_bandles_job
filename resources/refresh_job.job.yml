@@ -1,6 +1,23 @@
 # The main pipeline for test_bandles
 
 resources:
+  jobs:
+    refresh_job:
+      name : refresh_job
+
+      trigger:
+        periodic:
+          interval : 1
+          unit : DAYS
+
+      parameters :
+        - name : catalog 
+          default: ${var.catalog}
+        - name : schema
+          default: ${var.schema}
+
+      
+
   pipelines:
     test_bandles_etl:
       name: test_bandles_etl
