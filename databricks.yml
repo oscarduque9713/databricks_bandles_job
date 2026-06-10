@@ -1,8 +1,7 @@
 # This is a Databricks asset bundle definition for test_bandles.
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
 bundle:
-  name: test_bandles
-  uuid: 0ae7a385-64e3-46b4-b45f-f0d5ca4ed1fb
+  name: my-databricks-project
 
 include:
   - resources/*.yml
@@ -10,9 +9,15 @@ include:
 # Variable declarations. These variables are assigned in the dev/prod targets below.
 variables:
   catalog:
-    description: The catalog to use
+    description: Unity catalog for pipeline
+    default: main
   schema:
     description: The schema to use
+    default: default
+
+# Default workspace
+workspace:
+  host: https://dbc-94d97175-1f32.cloud.databricks.com/
 
 targets:
   dev:
@@ -22,16 +27,32 @@ targets:
     # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
     mode: development
     default: true
-    workspace:
-      host: https://dbc-94d97175-1f32.cloud.databricks.com
+    #workspace:
+      #host: https://dbc-94d97175-1f32.cloud.databricks.com
+    presets:
+      name_prefix: "[dev ${workspace.current_user.short_name}]"
     variables:
-      catalog: project_pipeline
-      schema: ${workspace.current_user.short_name}
+      catalog: dev
+      schema: dev
+  
+  stg:
+    mode: production
+    workspace:
+      # host
+      file_path: /Workspace/${bundle.target}/{bundle.name}/
+      root_path: /Workspace/${bundle.target}/{bundle.name}/.bundle/
+    presets: 
+      name_prefix: "[stg] "
+    variables:
+      catalog : stg
+      schema: stg
+  
   prod:
     mode: production
     workspace:
-      host: https://dbc-94d97175-1f32.cloud.databricks.com
+      #host: https://dbc-94d97175-1f32.cloud.databricks.com
       # We explicitly deploy to /Workspace/Users/ospina.oscard13@gmail.com to make sure we only have a single copy.
+      file_path: /Workspace/Users/ospina.oscard13@gmail.com/.bundle/${bundle.name}/${bundle.target}
       root_path: /Workspace/Users/ospina.oscard13@gmail.com/.bundle/${bundle.name}/${bundle.target}
     variables:
       catalog: project_pipeline
